@@ -32,7 +32,7 @@ export default function App(){
 
  useEffect(()=>{if(!selected)return;let dead=false;(async()=>{try{const r=await fetch(assetUrl(selected.image));if(!r.ok)throw new Error();const im=await createImageBitmap(await r.blob());if(dead)im.close();else{garmentImage?.close();setGarmentImage(im)}}catch{setError('Could not load outfit asset.')}})();return()=>{dead=true}},[selected]);
 
- useEffect(()=>{const c=canvasRef.current;if(!c||!photo)return;c.width=photo.width;c.height=photo.height;const ctx=c.getContext('2d');if(!ctx)return;ctx.drawImage(photo,0,0);if(result&&garmentImage&&selected){renderOutfitTryOn(ctx,{frame:photo,maskBitmap:result.maskBitmap,keypoints:result.keypoints,top:{image:garmentImage,anchors:selected.anchors,hemLength:selected.length},pants:null,harmonize:true,config})}},[photo,result,garmentImage,selected]);
+ useEffect(()=>{const c=canvasRef.current;if(!c||!photo)return;c.width=photo.width;c.height=photo.height;const ctx=c.getContext('2d');if(!ctx)return;ctx.drawImage(photo,0,0);if(result&&garmentImage&&selected){renderOutfitTryOn(ctx,{frame:photo,maskBitmap:result.maskBitmap,keypoints:result.keypoints,top:{image:garmentImage,anchors:selected.anchors,hemLength:selected.length},pants:null,config})}},[photo,result,garmentImage,selected]);
 
  const save=()=>{const c=canvasRef.current;if(!c||!photo||!result)return;const a=document.createElement('a');a.download='stylo-try-on.png';a.href=c.toDataURL('image/png');a.click();setStatus('PNG saved ✓')};
  const retry=()=>{if(photo)analyze(photo)};

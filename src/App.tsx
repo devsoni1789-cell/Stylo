@@ -1,47 +1,111 @@
-import {useCallback,useEffect,useMemo,useRef,useState,type ChangeEvent} from 'react';
-import {createInferenceWorker} from '@practics/tryon-core/workers';
-import {renderOutfitTryOn,type Accelerator,type GarmentAnchors,type HemLength,type PipelineResult,type PartialTryOnConfig} from '@practics/tryon-core';
+import {useMemo,useState,type ChangeEvent} from "react";
 
-type Garment={id:string;name:string;image:string;color:string;occasion:string[];styles:string[];sleeves?: 'full'|'half'|'sleeveless';length:HemLength;anchors:GarmentAnchors;description:string};
-const garments:Garment[]=[
-{id:'white',name:'Clean White Shirt',image:'/garments/white-shirt.svg',color:'White',occasion:['casual','college','office','date','travel'],styles:['Minimal','Classic','Smart Casual'],sleeves:'full',length:'hip',anchors:{shoulderL:[115,65],shoulderR:[485,65],waistL:[155,500],waistR:[445,500],hemL:[145,720],hemR:[455,720]},description:'Crisp and versatile.'},
-{id:'navy',name:'Navy Overshirt',image:'/garments/navy-overshirt.svg',color:'Navy',occasion:['casual','college','travel','date'],styles:['Minimal','Streetwear','Smart Casual'],sleeves:'full',length:'hip',anchors:{shoulderL:[100,70],shoulderR:[500,70],waistL:[145,505],waistR:[455,505],hemL:[130,730],hemR:[470,730]},description:'Relaxed utility layer.'},
-{id:'black',name:'Black Evening Shirt',image:'/garments/black-shirt.svg',color:'Black',occasion:['date','party','office','formal'],styles:['Minimal','Elegant','Classic'],sleeves:'full',length:'hip',anchors:{shoulderL:[112,62],shoulderR:[488,62],waistL:[150,500],waistR:[450,500],hemL:[142,720],hemR:[458,720]},description:'Clean evening silhouette.'},
-{id:'olive',name:'Olive Utility Shirt',image:'/garments/olive-shirt.svg',color:'Olive',occasion:['casual','college','travel'],styles:['Streetwear','Minimal','Sporty'],sleeves:'full',length:'hip',anchors:{shoulderL:[105,70],shoulderR:[495,70],waistL:[145,500],waistR:[455,500],hemL:[130,725],hemR:[470,725]},description:'Earthy and easy-going.'},
-{id:'cream',name:'Modern Cream Kurta',image:'/garments/cream-kurta.svg',color:'Cream',occasion:['wedding','party','formal','date'],styles:['Elegant','Classic','Minimal'],sleeves:'full',length:'knee',anchors:{shoulderL:[115,55],shoulderR:[485,55],waistL:[145,485],waistR:[455,485],hemL:[105,930],hemR:[495,930]},description:'Festive Indian-inspired look.'},
-{id:'burgundy',name:'Burgundy Statement Shirt',image:'/garments/burgundy-shirt.svg',color:'Burgundy',occasion:['party','date','wedding'],styles:['Elegant','Streetwear'],sleeves:'full',length:'hip',anchors:{shoulderL:[110,65],shoulderR:[490,65],waistL:[150,500],waistR:[450,500],hemL:[140,725],hemR:[460,725]},description:'A richer statement option.'}
-];
-const occasions=['casual','college','office','date','party','wedding','formal','travel'];
-const styles=['Minimal','Classic','Streetwear','Smart Casual','Elegant','Sporty'];
-const weather=['Hot','Warm','Cool','Cold','Rainy'];
-const config:PartialTryOnConfig={minKeypointScore:.3,anchors:{widthScale:{shoulder:1.15,hip:1.45},shoulderLift:.05,waistT:.62,hemFallbackMultiplier:{hip:.15,knee:1,ankle:1.9},skirtFlare:{hip:1,knee:1.9,ankle:2.6},dressFlare:{hip:1,knee:1.2,ankle:1.35},stanceCoverMargin:.25,stanceScoreSoftBand:.15},warpGrid:{cols:16,rows:24},armOcclusionRadiusFactor:.14};
-const assetUrl=(p:string)=>/^[a-z][a-z0-9+.-]*:/i.test(p)?p:import.meta.env.BASE_URL.replace(/\/$/,'')+p;
+const API="https://ai-stylist-backend-v2-production.up.railway.app";
+
+type Profile={usable:boolean;note?:string;faceShape?:string;hairstyle?:string;proportions?:string;skinToneUndertone?:string;bestColors?:string[];existingStyle?:string;summary?:string};
+type Outfit={title:string;items:{top?:string;bottom?:string;outerwear?:string;shoes?:string;watch?:string;eyewear?:string;accessory?:string};why:string;colorNotes?:string};
+type OutfitResponse={outfits:Outfit[];hairstyleSuggestion?:string;eyewearSuggestion?:string;accessorySuggestion?:string};
+
+const occasions=["Casual","College","Office","Date","Party","Wedding","Formal","Travel"];
+
+async function jsonPost(path:string,body:unknown){
+  const r=await fetch(API+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const d=await r.json();
+  if(!r.ok) throw new Error(d?.error||"Something went wrong");
+  return d;
+}
+
+function fileToData(file:File):Promise<{data:string;mediaType:string}>{
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{const s=String(reader.result);const i=s.indexOf(",");resolve({data:s.slice(i+1),mediaType:file.type||"image/jpeg"});};
+    reader.onerror=()=>reject(new Error("Could not read photo"));
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function App(){
- const [photo,setPhoto]=useState<ImageBitmap|null>(null),[result,setResult]=useState<PipelineResult|null>(null),[processing,setProcessing]=useState(false),[status,setStatus]=useState('Choose a photo to start'),[accelerator,setAccelerator]=useState<Accelerator>('webgpu'),[backend,setBackend]=useState<Accelerator|null>(null),[error,setError]=useState('');
- const [occasion,setOccasion]=useState('casual'),[style,setStyle]=useState('Minimal'),[temp,setTemp]=useState('Warm'),[selected,setSelected]=useState<Garment|null>(null),[garmentImage,setGarmentImage]=useState<ImageBitmap|null>(null);
- const canvasRef=useRef<HTMLCanvasElement>(null),workerRef=useRef<Worker|null>(null),seq=useRef(0),pending=useRef(new Map<number,{resolve:(x:PipelineResult)=>void,reject:(e:Error)=>void}>());
- const recommended=useMemo(()=>{const a=garments.filter(g=>g.occasion.includes(occasion)&&g.styles.includes(style));const b=garments.filter(g=>g.occasion.includes(occasion));return [...a,...b].filter((g,i,x)=>x.findIndex(v=>v.id===g.id)===i).slice(0,4)},[occasion,style]);
- useEffect(()=>{if(!selected&&recommended[0])setSelected(recommended[0])},[recommended,selected]);
+  const [photo,setPhoto]=useState<string>("");
+  const [photoData,setPhotoData]=useState<{data:string;mediaType:string}|null>(null);
+  const [profile,setProfile]=useState<Profile|null>(null);
+  const [outfits,setOutfits]=useState<OutfitResponse|null>(null);
+  const [occasion,setOccasion]=useState("Casual");
+  const [selected,setSelected]=useState(0);
+  const [result,setResult]=useState("");
+  const [busy,setBusy]=useState("");
+  const [error,setError]=useState("");
 
- useEffect(()=>{const w=createInferenceWorker();workerRef.current=w;setBackend(null);setError('');w.onmessage=(e:MessageEvent<any>)=>{const m=e.data;if(m.type==='ready'){setBackend(m.backend);setStatus(`AI ready • ${m.backend==='webgpu'?'GPU':'CPU'}`)}else if(m.type==='result'){const p=pending.current.get(m.seq);if(p){pending.current.delete(m.seq);p.resolve({keypoints:m.keypoints,maskBitmap:m.maskBitmap,timings:m.timings})}}else if(m.seq!==undefined){const p=pending.current.get(m.seq);if(p){pending.current.delete(m.seq);p.reject(new Error(m.message))}}else setError(m.message||'AI worker error')};w.onerror=e=>setError(e.message||'AI worker failed');w.postMessage({type:'init',wasmPath:assetUrl('/litert-wasm/'),modelPaths:{segmenter:assetUrl('/models/selfie_segmenter.tflite'),pose:assetUrl('/models/movenet_singlepose_lightning.tflite')},accelerator});return()=>{w.terminate();workerRef.current=null;pending.current.clear()}},[accelerator]);
+  const current=outfits?.outfits?.[selected];
+  const canGenerate=Boolean(photoData&&current);
 
- const analyze=useCallback(async(b:ImageBitmap)=>{const w=workerRef.current;if(!w){setError('AI engine is still loading.');return}setProcessing(true);setError('');setStatus('Analyzing pose and body mask on this device…');const copy=await createImageBitmap(b),n=++seq.current;const p=new Promise<PipelineResult>((resolve,reject)=>{pending.current.set(n,{resolve,reject});setTimeout(()=>{const x=pending.current.get(n);if(x){pending.current.delete(n);reject(new Error('AI inference timed out.'))}},30000)});w.postMessage({type:'process',bitmap:copy,seq:n},[copy]);try{const r=await p;setResult(r);setStatus('Analysis complete • ready for try-on')}catch(e){setError(e instanceof Error?e.message:String(e))}finally{setProcessing(false)}},[]);
+  async function upload(e:ChangeEvent<HTMLInputElement>){
+    const file=e.target.files?.[0]; if(!file)return;
+    if(file.size>15*1024*1024){setError("Photo must be under 15 MB.");return;}
+    setError("");setResult("");setOutfits(null);setProfile(null);
+    const d=await fileToData(file);
+    setPhoto("data:"+d.mediaType+";base64,"+d.data);setPhotoData(d);
+    try{
+      setBusy("Analyzing your style…");
+      const p=await jsonPost("/api/analyze",{imageBase64:d.data,mediaType:d.mediaType});
+      setProfile(p);
+      if(!p.usable) throw new Error(p.note||"Please upload a clear photo of yourself.");
+      setBusy("Creating personalized outfits…");
+      const o=await jsonPost("/api/outfits",{profile:p,occasion});
+      setOutfits(o);setSelected(0);
+    }catch(err){setError(err instanceof Error?err.message:"Could not analyze photo.");}
+    finally{setBusy("");}
+  }
 
- const onFile=async(e:ChangeEvent<HTMLInputElement>)=>{const f=e.target.files?.[0];if(!f)return;if(f.size>15*1024*1024){setError('Photo must be under 15 MB.');return}try{const b=await createImageBitmap(f);photo?.close();setPhoto(b);setResult(null);await analyze(b)}catch(err){setError(err instanceof Error?err.message:'Could not read photo')}e.target.value=''};
+  async function changeOccasion(next:string){
+    setOccasion(next); if(!profile)return;
+    try{setError("");setBusy("Creating new looks…");const o=await jsonPost("/api/outfits",{profile,occasion:next});setOutfits(o);setSelected(0);setResult("");}
+    catch(err){setError(err instanceof Error?err.message:"Could not create looks.");}finally{setBusy("");}
+  }
 
- useEffect(()=>{if(!selected)return;let dead=false;(async()=>{try{const r=await fetch(assetUrl(selected.image));if(!r.ok)throw new Error();const im=await createImageBitmap(await r.blob());if(dead)im.close();else{garmentImage?.close();setGarmentImage(im)}}catch{setError('Could not load outfit asset.')}})();return()=>{dead=true}},[selected]);
+  async function generate(){
+    if(!photoData||!current)return;
+    try{
+      setError("");setResult("");setBusy("Generating your realistic look…");
+      const d=await jsonPost("/api/try-on",{imageBase64:photoData.data,mediaType:photoData.mediaType,outfit:current,occasion,hairstyle:outfits?.hairstyleSuggestion,eyewear:outfits?.eyewearSuggestion,accessory:outfits?.accessorySuggestion});
+      setResult("data:"+d.mediaType+";base64,"+d.imageBase64);
+    }catch(err){setError(err instanceof Error?err.message:"Image generation failed.");}
+    finally{setBusy("");}
+  }
 
- useEffect(()=>{const c=canvasRef.current;if(!c||!photo)return;c.width=photo.width;c.height=photo.height;const ctx=c.getContext('2d');if(!ctx)return;ctx.drawImage(photo,0,0);if(result&&garmentImage&&selected){renderOutfitTryOn(ctx,{frame:photo,maskBitmap:result.maskBitmap,keypoints:result.keypoints,top:{image:garmentImage,anchors:selected.anchors,hemLength:selected.length},pants:null,config})}},[photo,result,garmentImage,selected]);
+  const profileChips=useMemo(()=>profile?.bestColors?.slice(0,5)||[],[profile]);
 
- const save=()=>{const c=canvasRef.current;if(!c||!photo||!result)return;const a=document.createElement('a');a.download='stylo-try-on.png';a.href=c.toDataURL('image/png');a.click();setStatus('PNG saved ✓')};
- const retry=()=>{if(photo)analyze(photo)};
+  return <div className="app">
+    <header><div className="brand"><span className="mark">S</span><div><b>Stylo</b><small>AI PERSONAL STYLIST</small></div></div><span className="pill">AI STYLE STUDIO</span></header>
 
- return <div className="app"><header><div><div className="brand">Stylo</div><div className="tag">PERSONAL FASHION STUDIO</div></div><div className="privacy">🔒 ON-DEVICE AI</div></header><main>
- <section className="hero"><div><span className="pill">100% free • no API key</span><h1>See yourself <em>in the look.</em></h1><p>Upload one photo. Stylo uses on-device AI to understand your pose and warp the selected outfit to your body. Your photo is processed in your browser.</p><label className="upload"><input type="file" accept="image/*" onChange={onFile}/><span>📷 <b>{photo?'Change photo':'Upload your photo'}</b><small>JPG, PNG or WEBP • max 15 MB</small></span></label>{error&&<div className="error">{error}<button onClick={()=>setAccelerator(accelerator==='webgpu'?'wasm':'webgpu')}>Try {accelerator==='webgpu'?'CPU':'GPU'} mode</button></div>}</div>
- <div className="stage"><div className="stage-head"><b>How will I look?</b><span>{processing?'AI WORKING…':backend?'AI READY':'LOADING AI…'}</span></div><div className="canvas-box">{photo?<canvas ref={canvasRef}/>:<div className="empty-stage"><span>✦</span><b>Your preview appears here</b><small>Upload a photo and choose a look.</small></div>}</div><div className="stage-actions"><button className="primary" disabled={!photo||!result||!garmentImage||processing} onClick={save}>↓ Save look</button><button disabled={!photo||processing} onClick={retry}>↻ Re-analyze</button></div></div></section>
- <section className="controls"><div className="control"><label>Occasion</label><div className="chips">{occasions.map(x=><button className={occasion===x?'active':''} onClick={()=>setOccasion(x)} key={x}>{x}</button>)}</div></div><div className="control"><label>Your style</label><div className="chips">{styles.map(x=><button className={style===x?'active':''} onClick={()=>setStyle(x)} key={x}>{x}</button>)}</div></div><div className="mini"><label>Weather</label><select value={temp} onChange={e=>setTemp(e.target.value)}>{weather.map(x=><option key={x}>{x}</option>)}</select></div></section>
- <section className="recommend"><div className="section-title"><div><span>PERSONALIZED PICKS</span><h2>Try these looks</h2></div><small>{recommended.length} matches</small></div><div className="cards">{recommended.map(g=><button className={'look-card '+(selected?.id===g.id?'selected':'')} key={g.id} onClick={()=>setSelected(g)}><div className="garment-art"><img src={assetUrl(g.image)} /></div><div className="look-info"><span>{g.color}</span><h3>{g.name}</h3><p>{g.description}</p><b>{selected?.id===g.id?'✓ Selected':'Try this look →'}</b></div></button>)}</div></section>
- <section className="trust"><div>🧠 <b>AI runs on your device</b><span>No photo upload or paid API.</span></div><div>⚡ <b>WebGPU when available</b><span>CPU fallback included.</span></div><div>💾 <b>Your photo stays local</b><span>Nothing is sent to Stylo.</span></div></section>
- </main><footer>Stylo • on-device virtual try-on • ₹0 API cost</footer></div>;
+    <main>
+      <section className="hero">
+        <div className="eyebrow">YOUR PHOTO → YOUR LOOK</div>
+        <h1>See yourself<br/><em>styled by AI.</em></h1>
+        <p>Upload one photo. Stylo studies your style, builds complete outfits, then generates a realistic preview of you wearing the look.</p>
+        <label className="upload"><input type="file" accept="image/*" onChange={upload}/><span>✦</span>{photo?"Change photo":"Upload your photo"}</label>
+        <div className="privacy">🔒 Your photo is processed only to create your style result.</div>
+      </section>
+
+      <section className="occasion">
+        <div className="sectionTitle"><span>01</span><b>Choose the occasion</b></div>
+        <div className="chips">{occasions.map(x=><button className={occasion===x?"active":""} onClick={()=>changeOccasion(x)} key={x}>{x}</button>)}</div>
+      </section>
+
+      {photo&&<section className="workspace">
+        <div className="photoCard"><img src={photo}/><div className="photoLabel">YOUR PHOTO</div></div>
+        <div className="panel">
+          <div className="sectionTitle"><span>02</span><b>Your AI stylist</b></div>
+          {profile&&<div className="profile"><strong>{profile.summary}</strong><div className="tags">{profile.faceShape&&<span>{profile.faceShape} face</span>}{profile.skinToneUndertone&&<span>{profile.skinToneUndertone} undertone</span>}{profileChips.map(c=><span key={c}>{c}</span>)}</div></div>}
+          {outfits&&<><div className="sectionTitle looksTitle"><span>03</span><b>Recommended looks</b></div><div className="looks">{outfits.outfits.map((o,i)=><button className={selected===i?"look activeLook":"look"} onClick={()=>{setSelected(i);setResult("")}} key={i}><div><b>{o.title}</b><small>{o.items.top||""} · {o.items.bottom||""}</small></div><span>→</span></button>)}</div></>}
+          {current&&<div className="selected"><b>{current.title}</b><p>{current.why}</p><div className="outfitItems">{Object.entries(current.items).filter(([,v])=>v).map(([k,v])=><span key={k}><small>{k}</small>{v}</span>)}</div></div>}
+          <button className="generate" disabled={!canGenerate||Boolean(busy)} onClick={generate}>{busy||"✦  SHOW ME HOW I’LL LOOK"}</button>
+          {error&&<div className="error">{error}</div>}
+        </div>
+      </section>}
+
+      {result&&<section className="result"><div className="resultHead"><div><span>04</span><b>Your generated look</b><small>AI-generated fashion preview</small></div><a href={result} download="stylo-look.jpg">Save image ↓</a></div><img src={result}/></section>}
+
+      {!photo&&<section className="features"><div><b>01</b><strong>Personalized</strong><p>Recommendations are based on your uploaded photo and chosen occasion.</p></div><div><b>02</b><strong>Complete looks</strong><p>Get the outfit, shoes, accessories, hair and eyewear—not just a shirt.</p></div><div><b>03</b><strong>AI preview</strong><p>Generate a new realistic image instead of placing a flat graphic over your body.</p></div></section>}
+    </main>
+  </div>
 }

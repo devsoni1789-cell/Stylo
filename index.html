@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stylo — Personal Outfit Stylist</title>
+<meta name="description" content="A private, offline-first fashion recommendation app.">
+<style>
+:root{--bg:#090b10;--panel:#11151d;--panel2:#171c26;--text:#f6f7fb;--muted:#9ca6b8;--line:#283040;--accent:#c7a7ff;--accent2:#8de1d0}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#202033 0,transparent 35%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}button,input{font:inherit}button{cursor:pointer}
+.wrap{max-width:1100px;margin:auto;padding:24px 16px 50px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:24px}.brand{font-size:28px;font-weight:800;letter-spacing:-1px}.badge{font-size:12px;color:var(--accent2);border:1px solid #31554f;border-radius:999px;padding:6px 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:linear-gradient(180deg,#151a24,#10141c);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 15px 50px #0004}.full{grid-column:1/-1}h1{font-size:clamp(30px,5vw,52px);line-height:1.03;margin:8px 0 12px}h2{font-size:18px;margin:0 0 12px}p{color:var(--muted);margin:6px 0 16px}.drop{min-height:230px;border:1.5px dashed #465066;border-radius:16px;display:grid;place-items:center;text-align:center;padding:20px;background:#0d1118}.drop img{max-width:100%;max-height:260px;border-radius:14px;display:none}.drop.ready img{display:block}.drop.ready .hint{display:none}.hint strong{display:block;color:var(--text);font-size:17px}.controls{display:grid;gap:14px}.row{display:flex;flex-wrap:wrap;gap:8px}.pill{background:#0d1118;color:#c8cfdb;border:1px solid var(--line);padding:9px 12px;border-radius:999px}.pill.active{background:#2b2540;color:#fff;border-color:#8d70d2}.label{font-size:12px;color:#8893a7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}.primary{width:100%;border:0;border-radius:13px;padding:13px 16px;background:linear-gradient(135deg,#c7a7ff,#8de1d0);color:#10131a;font-weight:800;margin-top:4px}.secondary{border:1px solid var(--line);background:#171c26;color:#fff;border-radius:11px;padding:9px 12px}.result{display:grid;grid-template-columns:1fr 1fr;gap:12px}.look{background:#0c1017;border:1px solid var(--line);border-radius:16px;padding:15px}.look h3{margin:0 0 8px}.look ul{margin:8px 0;padding-left:20px;color:#c7ceda}.swatches{display:flex;gap:7px;margin:10px 0}.sw{width:24px;height:24px;border-radius:50%;border:2px solid #fff3}.note{font-size:12px;color:#7f8a9d}.privacy{color:#aeb8c8;font-size:12px;text-align:center;margin-top:18px}@media(max-width:760px){.grid,.result{grid-template-columns:1fr}.full{grid-column:auto}.top{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><div class="brand">Stylo</div><div class="badge">PRIVATE • NO API KEY</div></div>
+<div class="grid">
+<section class="card"><h1>Dress better, without the guesswork.</h1><p>Upload a photo and tell Stylo the occasion, weather and vibe. Recommendations run in your browser.</p>
+<div id="drop" class="drop"><div class="hint"><strong>Upload your photo</strong>Tap here or choose an image. Your photo stays on this device.</div><img id="preview" alt="Your selected photo"></div>
+<input id="file" type="file" accept="image/*" hidden>
+</section>
+<section class="card"><h2>Your style brief</h2><div class="controls">
+<div><div class="label">Occasion</div><div class="row" data-group="occasion"><button class="pill active">Casual</button><button class="pill">College</button><button class="pill">Office</button><button class="pill">Date Night</button><button class="pill">Party</button><button class="pill">Wedding</button><button class="pill">Formal</button><button class="pill">Travel</button></div></div>
+<div><div class="label">Weather</div><div class="row" data-group="weather"><button class="pill active">Hot</button><button class="pill">Warm</button><button class="pill">Cool</button><button class="pill">Cold</button><button class="pill">Rainy</button></div></div>
+<div><div class="label">Fit</div><div class="row" data-group="fit"><button class="pill active">Regular</button><button class="pill">Relaxed</button><button class="pill">Sharp / Tailored</button></div></div>
+<div><div class="label">Style</div><div class="row" data-group="style"><button class="pill active">Minimal</button><button class="pill">Classic</button><button class="pill">Streetwear</button><button class="pill">Smart Casual</button><button class="pill">Elegant</button><button class="pill">Sporty</button></div></div>
+<button id="go" class="primary">✨ Build my looks</button>
+</div></section>
+<section class="card full"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><h2>Recommended looks</h2><p id="sub">Choose your brief and build a recommendation.</p></div><button id="demo" class="secondary">Try demo</button></div><div id="results" class="result"></div></section>
+</div>
+<div class="privacy">Stylo is an offline-style demo: no account, no upload server, no analytics SDK. Photo analysis only estimates broad color warmth from image pixels; it does not identify your face, skin tone, age or identity.</div>
+</div>
+<script>
+const state={occasion:'Casual',weather:'Hot',fit:'Regular',style:'Minimal'};
+const palettes={warm:['#f0c79b','#8c5a3c','#304b39'],cool:['#cbd5e1','#52627a','#29344d'],neutral:['#e8e1d5','#77716b','#252525']};
+const base={
+Casual:[['Linen shirt + straight trousers','Light linen shirt','Straight-leg trousers','Clean sneakers'],['Relaxed tee + overshirt','Premium crew-neck tee','Light overshirt','Minimal sneakers']],
+College:[['Tee + denim + sneakers','Heavyweight tee','Straight blue denim','Retro sneakers'],['Polo + chinos','Textured polo','Tapered chinos','Low-profile sneakers']],
+Office:[['Shirt + tailored trousers','Oxford shirt','Tailored trousers','Leather loafers'],['Knit polo + trousers','Fine-knit polo','Pleated trousers','Minimal leather shoes']],
+'Date Night':[['Open-collar shirt + trousers','Open-collar shirt','Dark tailored trousers','Chelsea boots'],['Knit top + clean denim','Fine-gauge knit','Dark straight denim','Leather sneakers']],
+Party:[['Statement shirt + trousers','Textured statement shirt','Dark trousers','Sleek boots'],['Monochrome layers','Fitted base layer','Structured overshirt','Clean boots']],
+Wedding:[['Elegant shirt + tailored trousers','Crisp dress shirt','Pressed tailored trousers','Dress loafers'],['Traditional-inspired layers','Band-collar shirt','Textured formal trousers','Polished loafers']],
+Formal:[['Suit + crisp shirt','Structured suit','Crisp dress shirt','Polished dress shoes'],['Tonal tailoring','Tonal blazer','Tailored trousers','Minimal dress shoes']],
+Travel:[['Breathable layers','Breathable tee','Light overshirt','Comfort sneakers'],['Utility casual','Relaxed polo','Utility trousers','Travel sneakers']]
+};
+function chosen(g){return [...document.querySelectorAll('[data-group="'+g+'"] .pill')].find(x=>x.classList.contains('active')).textContent}
+document.querySelectorAll('.row').forEach(row=>row.addEventListener('click',e=>{if(!e.target.classList.contains('pill'))return;row.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));e.target.classList.add('active')}));
+document.getElementById('drop').onclick=()=>document.getElementById('file').click();
+document.getElementById('file').onchange=e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);preview.src=u;drop.classList.add('ready')};
+function render(){state.occasion=chosen('occasion');state.weather=chosen('weather');state.fit=chosen('fit');state.style=chosen('style');let items=base[state.occasion]||base.Casual;if(state.weather==='Cold')items=items.map(x=>[x[0],x[1]+' + warm layer',x[2],x[3]+' + socks']);if(state.weather==='Rainy')items=items.map(x=>[x[0],x[1]+' + water-resistant layer',x[2],x[3]+' (weather-ready)']);const tone=state.style==='Elegant'?'cool':state.style==='Streetwear'?'neutral':'warm';results.innerHTML=items.map((x,i)=>'<article class="look"><h3>'+x[0]+'</h3><div class="swatches">'+palettes[tone].map(c=>'<i class="sw" style="background:'+c+'"></i>').join('')+'</div><ul><li>'+x[1]+'</li><li>'+x[2]+'</li><li>'+x[3]+'</li><li>Fit: '+state.fit+'</li></ul><div class="note">Styling direction: '+state.style+'. Keep proportions clean and repeat one accent color.</div></article>').join('');sub.textContent=state.occasion+' • '+state.weather+' • '+state.fit+' • '+state.style}
+go.onclick=render;demo.onclick=()=>{document.querySelector('[data-group="occasion"] .pill:nth-child(4)').click();document.querySelector('[data-group="weather"] .pill:nth-child(2)').click();render()};render();
+</script>
+</body></html>

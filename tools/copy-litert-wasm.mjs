@@ -1,0 +1,1 @@
+import {cp,mkdir} from 'node:fs/promises';import path from 'node:path';import {fileURLToPath} from 'node:url';const root=path.join(path.dirname(fileURLToPath(import.meta.url)),'..');await mkdir(path.join(root,'public','litert-wasm'),{recursive:true});await cp(path.join(root,'node_modules','@litertjs','core','wasm'),path.join(root,'public','litert-wasm'),{recursive:true});

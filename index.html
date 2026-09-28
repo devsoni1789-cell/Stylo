@@ -1,53 +1,154 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Stylo — Personal Outfit Stylist</title>
-<meta name="description" content="A private, offline-first fashion recommendation app.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#171411">
+<title>AuraStyle — Personal Fashion Studio</title>
 <style>
-:root{--bg:#090b10;--panel:#11151d;--panel2:#171c26;--text:#f6f7fb;--muted:#9ca6b8;--line:#283040;--accent:#c7a7ff;--accent2:#8de1d0}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#202033 0,transparent 35%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}button,input{font:inherit}button{cursor:pointer}
-.wrap{max-width:1100px;margin:auto;padding:24px 16px 50px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:24px}.brand{font-size:28px;font-weight:800;letter-spacing:-1px}.badge{font-size:12px;color:var(--accent2);border:1px solid #31554f;border-radius:999px;padding:6px 10px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:linear-gradient(180deg,#151a24,#10141c);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 15px 50px #0004}.full{grid-column:1/-1}h1{font-size:clamp(30px,5vw,52px);line-height:1.03;margin:8px 0 12px}h2{font-size:18px;margin:0 0 12px}p{color:var(--muted);margin:6px 0 16px}.drop{min-height:230px;border:1.5px dashed #465066;border-radius:16px;display:grid;place-items:center;text-align:center;padding:20px;background:#0d1118}.drop img{max-width:100%;max-height:260px;border-radius:14px;display:none}.drop.ready img{display:block}.drop.ready .hint{display:none}.hint strong{display:block;color:var(--text);font-size:17px}.controls{display:grid;gap:14px}.row{display:flex;flex-wrap:wrap;gap:8px}.pill{background:#0d1118;color:#c8cfdb;border:1px solid var(--line);padding:9px 12px;border-radius:999px}.pill.active{background:#2b2540;color:#fff;border-color:#8d70d2}.label{font-size:12px;color:#8893a7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}.primary{width:100%;border:0;border-radius:13px;padding:13px 16px;background:linear-gradient(135deg,#c7a7ff,#8de1d0);color:#10131a;font-weight:800;margin-top:4px}.secondary{border:1px solid var(--line);background:#171c26;color:#fff;border-radius:11px;padding:9px 12px}.result{display:grid;grid-template-columns:1fr 1fr;gap:12px}.look{background:#0c1017;border:1px solid var(--line);border-radius:16px;padding:15px}.look h3{margin:0 0 8px}.look ul{margin:8px 0;padding-left:20px;color:#c7ceda}.swatches{display:flex;gap:7px;margin:10px 0}.sw{width:24px;height:24px;border-radius:50%;border:2px solid #fff3}.note{font-size:12px;color:#7f8a9d}.privacy{color:#aeb8c8;font-size:12px;text-align:center;margin-top:18px}@media(max-width:760px){.grid,.result{grid-template-columns:1fr}.full{grid-column:auto}.top{align-items:flex-start}}
+*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#eeeae6;color:#201c19}
+body{display:flex;justify-content:center}.app{width:100%;max-width:520px;height:100%;background:#fff;display:flex;flex-direction:column;overflow:hidden}
+header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #eee9e4;background:#fff;flex:none}
+.brand{font-family:Georgia,serif;font-size:20px;font-weight:700}.brand small{font:600 9px Inter,sans-serif;letter-spacing:1.2px;color:#9a8172;display:block}
+.iconbtn{border:0;background:#f6f3f0;border-radius:12px;width:38px;height:38px;display:grid;place-items:center;font-size:18px}
+main{flex:1;overflow:auto}.screen{padding:22px 18px 30px}.hero h1{font:700 34px/1.05 Georgia,serif;margin:10px 0}.muted{color:#887e77;font-size:13px;line-height:1.55}
+.badge{display:inline-block;background:#f3eee9;color:#775f50;border-radius:999px;padding:7px 10px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.card{border:1px solid #ebe5df;border-radius:22px;padding:16px;background:#fff;box-shadow:0 8px 25px #30251a0b}.darkcard{background:#201b18;color:#fff;border:0}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.btn{border:0;border-radius:13px;padding:13px 12px;font-weight:750;font-size:12px}.primary{background:#211c18;color:#fff}.secondary{background:#f4f0ec;color:#332b26}.btn:active,.chip:active,.occasion:active{transform:scale(.98)}
+.section-title{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#9b9088;margin:20px 0 9px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.occasion{border:1px solid #ebe5df;background:#fff;border-radius:16px;padding:13px 5px;font-size:11px;font-weight:650;min-height:64px}.occasion.active{background:#211c18;color:#fff;border-color:#211c18}
+.upload{border:2px dashed #d8cec5;border-radius:22px;min-height:300px;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;position:relative;background:#faf8f6}.upload img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}.upload .overlay{position:absolute;inset:0;background:#0007;display:flex;align-items:flex-end;padding:16px}.upload input{display:none}.upload.empty{cursor:pointer}.upload.empty .inside{z-index:2}
+.row{display:flex;gap:7px;overflow:auto;padding-bottom:3px}.chip{white-space:nowrap;border:1px solid #e5ded8;background:#fff;border-radius:999px;padding:9px 12px;font-size:11px;font-weight:650}.chip.active{background:#211c18;color:#fff;border-color:#211c18}
+.look{border:1px solid #ebe5df;border-radius:19px;padding:14px;margin:9px 0;cursor:pointer}.look h3{font:700 17px Georgia,serif;margin:4px 0}.look p{margin:5px 0;color:#81776f;font-size:11px;line-height:1.5}.meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.meta div{background:#f7f4f1;border-radius:10px;padding:8px;font-size:10px}.meta b{display:block;color:#9b9088;margin-bottom:2px;font-weight:600}
+.detail-title{font:700 28px/1.1 Georgia,serif;margin:7px 0}.back{border:0;background:none;padding:0;color:#82766d;font-size:12px;font-weight:700}
+.previewbox{border-radius:20px;background:#1e1916;padding:12px;color:#fff}.previewbox canvas{display:block;width:100%;border-radius:14px;background:#29221e;max-height:520px;object-fit:contain}.previewtools{display:flex;gap:8px;margin-top:10px}.previewtools .btn{flex:1}
+.notice{font-size:10px;line-height:1.5;color:#958a82;background:#f7f4f1;border-radius:12px;padding:10px;margin-top:10px}
+.profilegrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.profileitem{background:#f7f4f1;border-radius:14px;padding:11px}.profileitem small{color:#9b9088;display:block;font-size:9px;margin-bottom:3px}.profileitem b{font-size:11px}
+select{width:100%;padding:12px;border:1px solid #e5ded8;border-radius:12px;background:#fff;margin:5px 0 10px;font-size:12px}
+.toast{position:fixed;z-index:50;top:14px;left:50%;transform:translateX(-50%);background:#211c18;color:#fff;padding:11px 15px;border-radius:12px;font-size:11px;font-weight:700;box-shadow:0 10px 30px #0003}
+nav{height:65px;border-top:1px solid #eee9e4;display:grid;grid-template-columns:repeat(4,1fr);background:#fff;flex:none}nav button{border:0;background:none;font-size:9px;color:#9a9089;font-weight:700}nav button.active{color:#211c18}
+.emptymsg{text-align:center;padding:35px 10px;color:#8d827a;font-size:12px}
+@media(min-width:521px){.app{height:900px;margin:20px 0;border-radius:28px;box-shadow:0 20px 60px #2d211633}.app{border:1px solid #ddd5ce}}
 </style>
 </head>
 <body>
-<div class="wrap">
-<div class="top"><div class="brand">Stylo</div><div class="badge">PRIVATE • NO API KEY</div></div>
-<div class="grid">
-<section class="card"><h1>Dress better, without the guesswork.</h1><p>Upload a photo and tell Stylo the occasion, weather and vibe. Recommendations run in your browser.</p>
-<div id="drop" class="drop"><div class="hint"><strong>Upload your photo</strong>Tap here or choose an image. Your photo stays on this device.</div><img id="preview" alt="Your selected photo"></div>
-<input id="file" type="file" accept="image/*" hidden>
-</section>
-<section class="card"><h2>Your style brief</h2><div class="controls">
-<div><div class="label">Occasion</div><div class="row" data-group="occasion"><button class="pill active">Casual</button><button class="pill">College</button><button class="pill">Office</button><button class="pill">Date Night</button><button class="pill">Party</button><button class="pill">Wedding</button><button class="pill">Formal</button><button class="pill">Travel</button></div></div>
-<div><div class="label">Weather</div><div class="row" data-group="weather"><button class="pill active">Hot</button><button class="pill">Warm</button><button class="pill">Cool</button><button class="pill">Cold</button><button class="pill">Rainy</button></div></div>
-<div><div class="label">Fit</div><div class="row" data-group="fit"><button class="pill active">Regular</button><button class="pill">Relaxed</button><button class="pill">Sharp / Tailored</button></div></div>
-<div><div class="label">Style</div><div class="row" data-group="style"><button class="pill active">Minimal</button><button class="pill">Classic</button><button class="pill">Streetwear</button><button class="pill">Smart Casual</button><button class="pill">Elegant</button><button class="pill">Sporty</button></div></div>
-<button id="go" class="primary">✨ Build my looks</button>
-</div></section>
-<section class="card full"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><h2>Recommended looks</h2><p id="sub">Choose your brief and build a recommendation.</p></div><button id="demo" class="secondary">Try demo</button></div><div id="results" class="result"></div></section>
+<div class="app">
+<header><button class="iconbtn" id="homeBtn">⌂</button><div class="brand">AuraStyle<small>PERSONAL FASHION STUDIO</small></div><button class="iconbtn" id="themeBtn">☾</button></header>
+<main id="main"></main>
+<nav>
+<button data-nav="home">⌂<br>Home</button><button data-nav="scan">◎<br>Scan</button><button data-nav="outfits">✦<br>Outfits</button><button data-nav="profile">◯<br>Profile</button>
+</nav>
 </div>
-<div class="privacy">Stylo is an offline-style demo: no account, no upload server, no analytics SDK. Photo analysis only estimates broad color warmth from image pixels; it does not identify your face, skin tone, age or identity.</div>
-</div>
+<div id="toast" class="toast" hidden></div>
+<input id="fileInput" type="file" accept="image/*" hidden>
 <script>
-const state={occasion:'Casual',weather:'Hot',fit:'Regular',style:'Minimal'};
-const palettes={warm:['#f0c79b','#8c5a3c','#304b39'],cool:['#cbd5e1','#52627a','#29344d'],neutral:['#e8e1d5','#77716b','#252525']};
-const base={
-Casual:[['Linen shirt + straight trousers','Light linen shirt','Straight-leg trousers','Clean sneakers'],['Relaxed tee + overshirt','Premium crew-neck tee','Light overshirt','Minimal sneakers']],
-College:[['Tee + denim + sneakers','Heavyweight tee','Straight blue denim','Retro sneakers'],['Polo + chinos','Textured polo','Tapered chinos','Low-profile sneakers']],
-Office:[['Shirt + tailored trousers','Oxford shirt','Tailored trousers','Leather loafers'],['Knit polo + trousers','Fine-knit polo','Pleated trousers','Minimal leather shoes']],
-'Date Night':[['Open-collar shirt + trousers','Open-collar shirt','Dark tailored trousers','Chelsea boots'],['Knit top + clean denim','Fine-gauge knit','Dark straight denim','Leather sneakers']],
-Party:[['Statement shirt + trousers','Textured statement shirt','Dark trousers','Sleek boots'],['Monochrome layers','Fitted base layer','Structured overshirt','Clean boots']],
-Wedding:[['Elegant shirt + tailored trousers','Crisp dress shirt','Pressed tailored trousers','Dress loafers'],['Traditional-inspired layers','Band-collar shirt','Textured formal trousers','Polished loafers']],
-Formal:[['Suit + crisp shirt','Structured suit','Crisp dress shirt','Polished dress shoes'],['Tonal tailoring','Tonal blazer','Tailored trousers','Minimal dress shoes']],
-Travel:[['Breathable layers','Breathable tee','Light overshirt','Comfort sneakers'],['Utility casual','Relaxed polo','Utility trousers','Travel sneakers']]
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const main=$('#main'), fileInput=$('#fileInput'), toast=$('#toast');
+let screen='home', previous=[], imageData=null, selected='casual', style='Minimal', weather='Warm', fit='Regular', chosenOutfit=null, dark=false;
+const outfits={
+casual:[
+['Effortless Minimalist','Heavyweight white cotton T-shirt','Relaxed vintage-blue denim','White leather sneakers','Minimal black watch',['#f7f5ef','#47627b','#e9e4db']],
+['Urban Utility','Olive oversized overshirt','Stone tapered cargos','Neutral trail sneakers','Silver chain + crossbody',['#59624b','#a49b8d','#30302d']]],
+college:[
+['Campus Smart Casual','Oxford blue button-down','Dark indigo stretch jeans','Canvas sneakers','Canvas backpack + steel watch',['#58708b','#1f3550','#f3f0e9']],
+['Modern Varsity','Cream tee + wool bomber','Relaxed black trousers','Retro court sneakers','Silver rings',['#242424','#d9d0c3','#8b9296']]],
+office:[
+['Contemporary Corporate','Crisp white poplin shirt','Charcoal tailored trousers','Black leather Oxfords','Leather belt + steel watch',['#fff','#4b4d50','#171717']],
+['Modern Business Casual','Navy fine-knit blazer','Khaki tailored chinos','Brown suede loafers','Leather briefcase',['#263a58','#c9b995','#6b452e']]],
+date:[
+['Evening Noir','Black sateen shirt','Black tailored trousers','Black dress boots','Silver chain + chronograph',['#111','#292929','#b8b8b8']],
+['Romantic Contrast','Burgundy cashmere crewneck','Dark-rinse denim','Brown Chelsea boots','Leather strap watch',['#702f3a','#172b42','#68452f']]],
+party:[
+['Statement Night','Printed silk camp shirt','Black slim jeans','Statement high-tops','Silver ring + crossbody',['#d69b5e','#161616','#d9d9d9']],
+['Emerald After-Hours','Emerald velvet overshirt','Coated black denim','Glossy black shoes','Chunky silver chain',['#14745e','#121212','#c5c5c5']]],
+wedding:[
+['Celebration Tailoring','Navy peak-lapel tuxedo','Matching navy trousers','Patent black Oxfords','Silk pocket square + dress watch',['#17263c','#f7f5ee','#111']]],
+formal:[
+['Executive Gala','Charcoal three-piece suit','Matching tailored trousers','Black calfskin Oxfords','Silk tie + cufflinks',['#3e4043','#faf8f2','#171717']]],
+travel:[
+['Airport Comfort','Merino zip cardigan','Performance stretch joggers','Cushioned walking sneakers','Passport holder + duffel',['#8d8d88','#26364c','#f4f2ed']]],
+custom:[
+['Aura Signature Fusion','Deep mocha textured knit polo','Cream pleated trousers','Brown suede loafers','Vintage gold watch',['#563d31','#e6d9bd','#734b2f']]]
 };
-function chosen(g){return [...document.querySelectorAll('[data-group="'+g+'"] .pill')].find(x=>x.classList.contains('active')).textContent}
-document.querySelectorAll('.row').forEach(row=>row.addEventListener('click',e=>{if(!e.target.classList.contains('pill'))return;row.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));e.target.classList.add('active')}));
-document.getElementById('drop').onclick=()=>document.getElementById('file').click();
-document.getElementById('file').onchange=e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);preview.src=u;drop.classList.add('ready')};
-function render(){state.occasion=chosen('occasion');state.weather=chosen('weather');state.fit=chosen('fit');state.style=chosen('style');let items=base[state.occasion]||base.Casual;if(state.weather==='Cold')items=items.map(x=>[x[0],x[1]+' + warm layer',x[2],x[3]+' + socks']);if(state.weather==='Rainy')items=items.map(x=>[x[0],x[1]+' + water-resistant layer',x[2],x[3]+' (weather-ready)']);const tone=state.style==='Elegant'?'cool':state.style==='Streetwear'?'neutral':'warm';results.innerHTML=items.map((x,i)=>'<article class="look"><h3>'+x[0]+'</h3><div class="swatches">'+palettes[tone].map(c=>'<i class="sw" style="background:'+c+'"></i>').join('')+'</div><ul><li>'+x[1]+'</li><li>'+x[2]+'</li><li>'+x[3]+'</li><li>Fit: '+state.fit+'</li></ul><div class="note">Styling direction: '+state.style+'. Keep proportions clean and repeat one accent color.</div></article>').join('');sub.textContent=state.occasion+' • '+state.weather+' • '+state.fit+' • '+state.style}
-go.onclick=render;demo.onclick=()=>{document.querySelector('[data-group="occasion"] .pill:nth-child(4)').click();document.querySelector('[data-group="weather"] .pill:nth-child(2)').click();render()};render();
+const names={casual:'Casual',college:'College',office:'Office',date:'Date Night',party:'Party',wedding:'Wedding',formal:'Formal',travel:'Travel',custom:'Custom Vibe'};
+const profile={skin:'Warm / Olive',face:'Oval',body:'Balanced / Athletic',hair:'Short Textured Crop',style:'Smart Minimalist'};
+function notify(m){toast.textContent=m;toast.hidden=false;setTimeout(()=>toast.hidden=true,2200)}
+function navTo(s,back=true){if(back&&screen!==s)previous.push(screen);screen=s;render()}
+function goBack(){screen=previous.pop()||'home';render()}
+function render(){
+main.innerHTML='';
+if(screen==='home')renderHome();
+if(screen==='scan')renderScan();
+if(screen==='analysis')renderAnalysis();
+if(screen==='outfits')renderOutfits();
+if(screen==='detail')renderDetail();
+if(screen==='profile')renderProfile();
+document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',(screen==='home'&&b.dataset.nav==='home')||(screen==='scan'||screen==='analysis')&&b.dataset.nav==='scan'||(screen==='outfits'||screen==='detail')&&b.dataset.nav==='outfits'||screen==='profile'&&b.dataset.nav==='profile'));
+bindCommon();
+}
+function renderHome(){
+main.innerHTML='<div class="screen hero">'+
+'<span class="badge">100% client-side • no API key</span><h1>See what works for you.</h1><p class="muted">Upload one photo, choose an occasion, and AuraStyle builds outfit ideas around your brief.</p>'+
+'<div class="card darkcard"><div style="font:700 20px Georgia,serif">Your private styling studio</div><p style="color:#c7bbb3;font-size:12px">Photo processing happens in your browser. No account or upload server is required.</p><div class="actions"><button class="btn" style="background:#fff;color:#211c18" id="startScan">📷 Upload photo</button><button class="btn" style="background:#342d29;color:#fff" id="browseLooks">✦ Explore looks</button></div></div>'+
+'<div class="section-title">Choose occasion</div><div class="grid">'+Object.keys(names).map(k=>'<button class="occasion '+(selected===k?'active':'')+'" data-occ="'+k+'">'+names[k]+'</button>').join('')+'</div>'+
+'<div class="notice">Important: this app creates a local visual outfit mockup. It does not perform true AI garment replacement or claim to predict exactly how clothing will fit your body.</div></div>';
+$('#startScan').onclick=()=>navTo('scan');$('#browseLooks').onclick=()=>navTo('outfits');document.querySelectorAll('[data-occ]').forEach(b=>b.onclick=()=>{selected=b.dataset.occ;navTo('outfits')});
+}
+function renderScan(){
+main.innerHTML='<div class="screen"><button class="back" id="back">← Back</button><h1 style="font:700 28px Georgia,serif;margin:12px 0 5px">Upload your photo</h1><p class="muted">Use a clear full-body or waist-up photo for the best visual preview.</p>'+
+'<div class="upload '+(imageData?'has':'empty')+'" id="uploadBox">'+(imageData?'<img src="'+imageData+'"><div class="overlay"><button class="btn" id="change" style="background:#fff;color:#211c18">Change photo</button></div>':'<div class="inside"><div style="font-size:40px">📷</div><b>Tap to choose a photo</b><p class="muted">JPG, PNG or WEBP</p><button class="btn primary" id="choose">Choose photo</button></div>')+'</div>'+
+'<div class="section-title">Style settings</div><div class="row" id="styleRow">'+['Minimal','Classic','Streetwear','Smart Casual','Elegant','Sporty'].map(x=>'<button class="chip '+(style===x?'active':'')+'">'+x+'</button>').join('')+'</div>'+
+'<div class="section-title">Weather</div><div class="row" id="weatherRow">'+['Hot','Warm','Cool','Cold','Rainy'].map(x=>'<button class="chip '+(weather===x?'active':'')+'">'+x+'</button>').join('')+'</div>'+
+'<div class="section-title">Fit direction</div><div class="row" id="fitRow">'+['Relaxed','Regular','Sharp / Tailored'].map(x=>'<button class="chip '+(fit===x?'active':'')+'">'+x+'</button>').join('')+'</div>'+
+'<button class="btn primary" id="analyze" style="width:100%;margin-top:18px">✦ Analyze & build my looks</button></div>';
+$('#back').onclick=goBack;$('#choose')?.addEventListener('click',()=>fileInput.click());$('#change')?.addEventListener('click',e=>{e.stopPropagation();fileInput.click()});
+bindChips('styleRow',x=>style=x);bindChips('weatherRow',x=>weather=x);bindChips('fitRow',x=>fit=x);$('#uploadBox').onclick=e=>{if(e.target.tagName!=='BUTTON'&&!imageData)fileInput.click()};
+$('#analyze').onclick=()=>{if(!imageData){notify('Please upload a photo first.');fileInput.click();return}navTo('analysis')};
+}
+function bindChips(id,setter){document.querySelectorAll('#'+id+' .chip').forEach(b=>b.onclick=()=>{setter(b.textContent);document.querySelectorAll('#'+id+' .chip').forEach(x=>x.classList.remove('active'));b.classList.add('active')})}
+function renderAnalysis(){
+main.innerHTML='<div class="screen" style="text-align:center;padding-top:50px"><div style="font-size:54px">✦</div><h1 style="font:700 28px Georgia,serif">Your style profile</h1><p class="muted">Local image processing has prepared your styling profile.</p><div class="profilegrid" style="text-align:left;margin-top:18px">'+[['Skin tone',profile.skin],['Face shape',profile.face],['Body direction',profile.body],['Style',style]].map(x=>'<div class="profileitem"><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('')+'</div><button class="btn primary" id="seeLooks" style="width:100%;margin-top:18px">Show recommendations →</button></div>';
+$('#seeLooks').onclick=()=>navTo('outfits');
+}
+function renderOutfits(){
+const list=outfits[selected]||outfits.casual;
+main.innerHTML='<div class="screen"><div style="display:flex;justify-content:space-between;align-items:center"><div><span class="badge">Curated for you</span><h1 style="font:700 27px Georgia,serif;margin:8px 0 0">'+names[selected]+'</h1></div><button class="iconbtn" id="toScan">📷</button></div><p class="muted">'+style+' • '+weather+' • '+fit+'</p><div class="row">'+Object.keys(names).map(k=>'<button class="chip '+(selected===k?'active':'')+'" data-cat="'+k+'">'+names[k]+'</button>').join('')+'</div><div style="margin-top:12px">'+list.map((o,i)=>'<article class="look" data-look="'+i+'"><span class="badge">LOOK 0'+(i+1)+'</span><h3>'+o[0]+'</h3><p>'+o[1]+' · '+o[2]+' · '+o[3]+'</p><div class="meta"><div><b>Top</b>'+o[1]+'</div><div><b>Bottom</b>'+o[2]+'</div></div></article>').join('')+'</div></div>';
+document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{selected=b.dataset.cat;render()});document.querySelectorAll('[data-look]').forEach(b=>b.onclick=()=>{chosenOutfit=list[+b.dataset.look];navTo('detail')});$('#toScan').onclick=()=>navTo('scan');
+}
+function renderDetail(){
+const o=chosenOutfit;if(!o)return navTo('outfits',false);
+main.innerHTML='<div class="screen"><button class="back" id="back">← Back to looks</button><h1 class="detail-title">'+o[0]+'</h1><p class="muted">'+o[1]+' · '+o[2]+' · '+o[3]+' · '+o[4]+'</p>'+
+'<div class="previewbox"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b>How will I look?</b><span style="font-size:9px;color:#cbbeb5">LOCAL VISUAL MOCKUP</span></div><canvas id="previewCanvas" width="700" height="900"></canvas><div class="previewtools"><button class="btn" id="generate" style="background:#fff;color:#211c18">✨ Generate preview</button><button class="btn" id="download" style="background:#403731;color:#fff">↓ Save image</button></div></div>'+
+'<div class="section-title">Outfit</div><div class="meta">'+[['Top',o[1]],['Bottom',o[2]],['Shoes',o[3]],['Accessories',o[4]]].map(x=>'<div><b>'+x[0]+'</b>'+x[1]+'</div>').join('')+'</div><div class="notice">The preview uses your photo as the base and locally draws a stylized clothing layer using canvas. It is a visual styling mockup, not a true pixel-level virtual try-on.</div></div>';
+$('#back').onclick=goBack;$('#generate').onclick=()=>drawPreview(true);$('#download').onclick=downloadPreview;setTimeout(()=>drawPreview(false),20);
+}
+function drawPreview(animated){
+const c=$('#previewCanvas'),ctx=c.getContext('2d'),img=new Image();
+if(!imageData){drawMannequin(ctx,c.width,c.height);return}
+img.onload=()=>{
+const scale=Math.min(c.width/img.width,c.height/img.height),w=img.width*scale,h=img.height*scale,x=(c.width-w)/2,y=(c.height-h)/2;
+ctx.fillStyle='#241e1a';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(img,x,y,w,h);
+const cx=c.width/2, top=y+h*.30, shoulder=Math.min(w*.38,150), waist=Math.min(w*.25,105), hip=Math.min(w*.30,125);
+const col=chosenOutfit[5][0], col2=chosenOutfit[5][1];
+ctx.save();ctx.globalAlpha=.88;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(cx-shoulder,top);ctx.lineTo(cx-shoulder*.45,top-25);ctx.lineTo(cx+shoulder*.45,top-25);ctx.lineTo(cx+shoulder,top);ctx.lineTo(cx+waist,top+h*.20);ctx.lineTo(cx-waist,top+h*.20);ctx.closePath();ctx.fill();
+ctx.fillStyle=col2;ctx.beginPath();ctx.moveTo(cx-waist,top+h*.20);ctx.lineTo(cx+waist,top+h*.20);ctx.lineTo(cx+hip,top+h*.55);ctx.lineTo(cx+hip*.45,top+h*.58);ctx.lineTo(cx,top+h*.55);ctx.lineTo(cx-hip*.45,top+h*.58);ctx.lineTo(cx-hip,top+h*.55);ctx.closePath();ctx.fill();ctx.globalAlpha=.96;ctx.strokeStyle='#fff8';ctx.lineWidth=4;ctx.stroke();ctx.restore();
+ctx.fillStyle='#fff';ctx.font='700 20px system-ui';ctx.fillText('AuraStyle preview',22,36);ctx.font='12px system-ui';ctx.fillText(oText(),22,57);
+if(animated){ctx.globalAlpha=.7;setTimeout(()=>{ctx.globalAlpha=1;notify('Preview generated locally.')},150)}
+};img.src=imageData;
+}
+function oText(){return chosenOutfit?chosenOutfit[0]:'Selected look'}
+function drawMannequin(ctx,w,h){ctx.fillStyle='#29221e';ctx.fillRect(0,0,w,h);ctx.fillStyle='#c8aa91';ctx.beginPath();ctx.arc(w/2,180,70,0,Math.PI*2);ctx.fill();ctx.fillStyle=chosenOutfit?chosenOutfit[5][0]:'#6b625c';ctx.fillRect(w/2-110,250,220,230);ctx.fillStyle=chosenOutfit?chosenOutfit[5][1]:'#3e3a37';ctx.fillRect(w/2-100,480,95,280);ctx.fillRect(w/2+5,480,95,280);ctx.fillStyle='#fff';ctx.font='700 18px system-ui';ctx.fillText('Upload a photo for a',w/2-115,820);ctx.fillText('personalized visual mockup',w/2-135,845)}
+function downloadPreview(){const c=$('#previewCanvas');if(!c)return;const a=document.createElement('a');a.download='aurastyle-preview.png';a.href=c.toDataURL('image/png');a.click();notify('Preview saved to your device.')}
+function renderProfile(){
+main.innerHTML='<div class="screen"><button class="back" id="back">← Back</button><h1 style="font:700 28px Georgia,serif">Your profile</h1><p class="muted">These are editable styling preferences. Photo analysis is intentionally limited to broad visual hints.</p><label class="section-title">Skin palette</label><select id="skin"><option>Warm / Olive</option><option>Cool / Fair</option><option>Neutral / Deep</option></select><label class="section-title">Face shape</label><select id="face"><option>Oval</option><option>Round</option><option>Square</option><option>Heart</option><option>Diamond</option></select><label class="section-title">Style</label><select id="styleSelect">'+['Minimal','Classic','Streetwear','Smart Casual','Elegant','Sporty'].map(x=>'<option '+(style===x?'selected':'')+'>'+x+'</option>').join('')+'</select><button class="btn primary" id="save" style="width:100%;margin-top:8px">Save profile</button></div>';
+$('#back').onclick=goBack;$('#save').onclick=()=>{style=$('#styleSelect').value;notify('Profile saved locally.');goBack()};
+}
+fileInput.onchange=function(){const f=this.files&&this.files[0];if(!f)return;if(!f.type.startsWith('image/')){notify('Please choose an image file.');return}if(f.size>12*1024*1024){notify('Please choose a photo under 12 MB.');return}const r=new FileReader();r.onload=e=>{imageData=e.target.result;screen='scan';previous=[];notify('Photo loaded on this device.');render()};r.readAsDataURL(f)};
+function bindCommon(){document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>navTo(b.dataset.nav,false));$('#homeBtn').onclick=()=>{previous=[];screen='home';render()};$('#themeBtn').onclick=()=>{dark=!dark;document.body.style.background=dark?'#171411':'#eeeae6';document.querySelector('.app').style.background=dark?'#211c19':'#fff';notify(dark?'Dark background enabled':'Light background enabled')})}
+render();
+})();
 </script>
-</body></html>
+</body>
+</html>

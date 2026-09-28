@@ -1,6 +1,6 @@
 import {useMemo,useState,type ChangeEvent} from "react";
 
-const API="https://ai-stylist-backend-v2-production.up.railway.app";
+const API="https://stylo-generative-backend-production.up.railway.app";
 
 type Profile={usable:boolean;note?:string;faceShape?:string;hairstyle?:string;proportions?:string;skinToneUndertone?:string;bestColors?:string[];existingStyle?:string;summary?:string};
 type Outfit={title:string;items:{top?:string;bottom?:string;outerwear?:string;shoes?:string;watch?:string;eyewear?:string;accessory?:string};why:string;colorNotes?:string};
